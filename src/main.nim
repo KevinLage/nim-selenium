@@ -112,10 +112,18 @@ proc getPageSource*(self: Session): string =
 
     return respObj["value"].getStr()
 
+proc getAllCookies*(self: Session): seq =
+    let requrl = $(self.driver.url / "session" / self.id / "cookie")
+    let resp = self.driver.client.getContent(requrl)
+
+    let respObj = parseJson(resp)
+
+    return respObj["value"].getElems()
+
 when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
-    session.navigate("https://example.com/")
-    echo session.getWindowHandle
-    echo session.getPageSource()
+    session.navigate("https://spotify.com/")
+    echo session.getWindowHandle()
+    echo session.getAllCookies()
