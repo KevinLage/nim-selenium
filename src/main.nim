@@ -103,12 +103,19 @@ proc getWindowHandle*(self: Session): string =
 proc closeWindow*(self: Session) =
     let requrl = $(self.driver.url / "session" / self.id / "window")
     let resp = self.driver.client.deleteContent(requrl)
-    echo resp
+
+proc getPageSource*(self: Session): string =
+    let requrl = $(self.driver.url / "session" / self.id / "source")
+    let resp = self.driver.client.getContent(requrl)
+
+    let respObj = parseJson(resp)
+
+    return respObj["value"].getStr()
 
 when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
-    session.navigate("https://google.com/")
+    session.navigate("https://example.com/")
     echo session.getWindowHandle
-    session.closeWindow()
+    echo session.getPageSource()
