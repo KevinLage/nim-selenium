@@ -138,3 +138,4 @@ when isMainModule:
     echo session.getAllCookies()
     session.takeScreenshot("test.png") 
     session.closeWindow()
+    #test
