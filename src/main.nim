@@ -1,4 +1,4 @@
-import httpclient, uri, json, tables
+import httpclient, uri, json, tables, base64
 
 type 
     WebDriver* = ref object
@@ -120,10 +120,21 @@ proc getAllCookies*(self: Session): seq =
 
     return respObj["value"].getElems()
 
+proc takeScreenshot(self: Session, filename: string) =
+    let requrl = $(self.driver.url / "session" / self.id / "screenshot")
+    let resp = self.driver.client.getContent(requrl)
+
+    let respObj = parseJson(resp)
+
+    let decoded = decode(respObj["value"].getStr())
+    writeFile(filename, decoded)
+
 when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
-    session.navigate("https://spotify.com/")
+    session.navigate("https://example.com/")
     echo session.getWindowHandle()
     echo session.getAllCookies()
+    session.takeScreenshot("test.png") 
+    session.closeWindow()
