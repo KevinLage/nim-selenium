@@ -120,6 +120,15 @@ proc getAllCookies*(self: Session): seq =
 
     return respObj["value"].getElems()
 
+proc deleteAllCookies*(self: Session) =
+    let requrl = $(self.driver.url / "session" / self.id / "cookie")
+    let resp = self.driver.client.deleteContent(requrl)
+
+    let respObj = parseJson(resp)
+
+    if respObj["value"].kind != JNull:
+        raise newException(WebDriverException, $respObj)
+    
 proc takeScreenshot(self: Session, filename: string) =
     let requrl = $(self.driver.url / "session" / self.id / "screenshot")
     let resp = self.driver.client.getContent(requrl)
@@ -133,8 +142,9 @@ when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
-    session.navigate("https://example.com/")
+    session.navigate("https://spotify.com/")
     echo session.getWindowHandle()
+    session.deleteAllCookies()
     echo session.getAllCookies()
     session.takeScreenshot("test.png") 
     session.closeWindow()
