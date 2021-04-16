@@ -28,7 +28,6 @@ proc createSession*(self: WebDriver): Session =
     let sessionReq = %*{"caoabilities": {}}
     let sessionResp = self.client.postContent($(self.url / "session"),
                                                         $sessionReq)
-    #echo sessionResp
 
     let parsedid = parseJson(sessionResp)
     if parsedid["value"]["sessionId"].isNil():
@@ -87,7 +86,7 @@ proc refresh*(self: Session) =
 proc getTitle*(self: Session): string =
     let requrl = $(self.driver.url / "session" / self.id / "title")
     let resp = self.driver.client.getContent(requrl)
-    #echo resp
+
     let respObj = parseJson(resp)
     
     return respObj["value"].getStr() 
@@ -108,6 +107,11 @@ proc closeWindow*(self: Session) =
 
     if respObj["value"].getStr() != "":
         raise newException(WebDriverException, $respObj)
+
+proc fullScreen*(self: Session) =
+    let requrl = $(self.driver.url / "session" / self.id / "window" / "fullscreen")
+    let obj = %*{"":""}
+    discard self.driver.client.postContent(requrl, $obj)
 
 proc getPageSource*(self: Session): string =
     let requrl = $(self.driver.url / "session" / self.id / "source")
@@ -134,7 +138,7 @@ proc deleteAllCookies*(self: Session) =
     if respObj["value"].kind != JNull:
         raise newException(WebDriverException, $respObj)
     
-proc takeScreenshot(self: Session, filename: string) =
+proc takeScreenshot*(self: Session, filename: string) =
     let requrl = $(self.driver.url / "session" / self.id / "screenshot")
     let resp = self.driver.client.getContent(requrl)
 
@@ -148,8 +152,5 @@ when isMainModule:
     let session = webdriver.createSession()
     #echo session
     session.navigate("https://spotify.com/")
-    echo session.getWindowHandle()
-    session.deleteAllCookies()
-    echo session.getAllCookies()
-    session.takeScreenshot("test.png") 
+    session.fullScreen()
     session.closeWindow()
