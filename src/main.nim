@@ -104,6 +104,11 @@ proc closeWindow*(self: Session) =
     let requrl = $(self.driver.url / "session" / self.id / "window")
     let resp = self.driver.client.deleteContent(requrl)
 
+    let respObj = parseJson(resp)
+
+    if respObj["value"].getStr() != "":
+        raise newException(WebDriverException, $respObj)
+
 proc getPageSource*(self: Session): string =
     let requrl = $(self.driver.url / "session" / self.id / "source")
     let resp = self.driver.client.getContent(requrl)
