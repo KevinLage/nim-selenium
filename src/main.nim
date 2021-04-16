@@ -55,23 +55,29 @@ proc getCurrentUrl*(self: Session): string =
 
     return parsedObj.getStr()
 
-proc back*(self: Session) =
+proc back*(self: Session, count: int = 1) =
     let requrl = $(self.driver.url / "session" / self.id / "back")
     let obj = %*{"":""}
-    let resp = self.driver.client.postContent(requrl, $obj)
+    var i = 0
 
-    let respObj = parseJson(resp)
-    if respObj["value"].kind != JNull:
-        raise newException(WebDriverException, $respObj)
+    while count > i:
+        i.inc
+        let resp = self.driver.client.postContent(requrl, $obj)
+        let respObj = parseJson(resp)
+        if respObj["value"].kind != JNull:
+            raise newException(WebDriverException, $respObj)
 
-proc forward*(self: Session) =
+proc forward*(self: Session, count: int = 1) =
     let requrl = $(self.driver.url / "session" / self.id / "forward")
     let obj = %*{"":""}
-    let resp = self.driver.client.postContent(requrl, $obj)
+    var i = 0
 
-    let respObj = parseJson(resp)
-    if respObj["value"].kind != JNull:
-        raise newException(WebDriverException, $respObj)
+    while count > i:
+        i.inc
+        let resp = self.driver.client.postContent(requrl, $obj)
+        let respObj = parseJson(resp)
+        if respObj["value"].kind != JNull:
+            raise newException(WebDriverException, $respObj)
 
     
 proc refresh*(self: Session) =
@@ -162,9 +168,9 @@ when isMainModule:
     let session = webdriver.createSession()
     #echo session
     session.navigate("https://spotify.com/")
-    session.minimize()
-    sleep(1000)
-    session.maximize()
-    sleep(1000)
-    session.fullScreen()
-    session.closeWindow()
+    session.navigate("https://example.com/")
+    session.navigate("https://google.com/")
+    session.navigate("https://domain.com/")
+    session.back(5)
+    session.forward(5)
+    #session.closeWindow()
