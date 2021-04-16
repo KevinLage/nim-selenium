@@ -1,4 +1,4 @@
-import httpclient, uri, json, tables, base64
+import httpclient, uri, json, tables, base64, os 
 
 type 
     WebDriver* = ref object
@@ -108,6 +108,16 @@ proc closeWindow*(self: Session) =
     if respObj["value"].getStr() != "":
         raise newException(WebDriverException, $respObj)
 
+proc maximize*(self: Session) =
+    let requrl = $(self.driver.url / "session" / self.id / "window" / "maximize")
+    let obj = %*{"":""}
+    discard self.driver.client.postContent(requrl, $obj)
+
+proc minimize*(self: Session) =
+    let requrl = $(self.driver.url / "session" / self.id / "window" / "minimize")
+    let obj = %*{"":""}
+    discard self.driver.client.postContent(requrl, $obj)
+
 proc fullScreen*(self: Session) =
     let requrl = $(self.driver.url / "session" / self.id / "window" / "fullscreen")
     let obj = %*{"":""}
@@ -152,5 +162,9 @@ when isMainModule:
     let session = webdriver.createSession()
     #echo session
     session.navigate("https://spotify.com/")
+    session.minimize()
+    sleep(1000)
+    session.maximize()
+    sleep(1000)
     session.fullScreen()
     session.closeWindow()
