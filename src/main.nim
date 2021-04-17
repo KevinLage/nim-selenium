@@ -145,6 +145,18 @@ proc getAllCookies*(self: Session): seq =
 
     return respObj["value"].getElems()
 
+proc addCookies*(self: Session, toadd: seq) =
+    let requrl = $(self.driver.url / "session" / self.id / "cookie")
+
+    for i in low(toadd)..high(toadd):
+        let obj = %*{"cookie": %*toadd[i]}
+        let resp = self.driver.client.postContent(requrl, $obj)
+        
+        let respObj = parseJson(resp)
+
+        if respObj["value"].kind != JNull:
+            raise newException(WebDriverException, $respObj)
+
 proc deleteAllCookies*(self: Session) =
     let requrl = $(self.driver.url / "session" / self.id / "cookie")
     let resp = self.driver.client.deleteContent(requrl)
@@ -167,10 +179,11 @@ when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
-    session.navigate("https://spotify.com/")
-    session.navigate("https://example.com/")
     session.navigate("https://google.com/")
-    session.navigate("https://domain.com/")
-    session.back(5)
-    session.forward(5)
-    #session.closeWindow()
+    var cookie = session.getAllCookies()
+    echo cookie
+    session.navigate("https://google.com/")
+    session.deleteAllCookies()
+    session.addCookies(cookie)
+    echo session.getAllCookies()
+    session.closeWindow()
