@@ -25,7 +25,7 @@ proc createSession*(self: WebDriver): Session =
     if not parsed["value"]["ready"].getBool():
         raise newException(WebDriverException, "WebDriver is not Ready")
 
-    let sessionReq = %*{"caoabilities": {}}
+    let sessionReq = %*{"capabilities": {}}
     let sessionResp = self.client.postContent($(self.url / "session"),
                                                         $sessionReq)
 
