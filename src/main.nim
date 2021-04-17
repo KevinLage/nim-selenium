@@ -117,16 +117,19 @@ proc closeWindow*(self: Session) =
 proc maximize*(self: Session) =
     let requrl = $(self.driver.url / "session" / self.id / "window" / "maximize")
     let obj = %*{"":""}
+
     discard self.driver.client.postContent(requrl, $obj)
 
 proc minimize*(self: Session) =
     let requrl = $(self.driver.url / "session" / self.id / "window" / "minimize")
     let obj = %*{"":""}
+
     discard self.driver.client.postContent(requrl, $obj)
 
 proc fullScreen*(self: Session) =
     let requrl = $(self.driver.url / "session" / self.id / "window" / "fullscreen")
     let obj = %*{"":""}
+
     discard self.driver.client.postContent(requrl, $obj)
 
 proc getPageSource*(self: Session): string =
@@ -175,15 +178,45 @@ proc takeScreenshot*(self: Session, filename: string) =
     let decoded = decode(respObj["value"].getStr())
     writeFile(filename, decoded)
 
+proc executeScript*(self: Session, script: string) =
+    let requrl = $(self.driver.url / "session" / self.id / "execute" / "sync")
+    let obj = %*{"script": script, "args": []}
+
+    let resp = self.driver.client.postContent(requrl, $obj)
+
+    let respObj = parseJson(resp)
+
+    if respObj["value"].kind != JNull:
+        raise newException(WebDriverException, $respObj)
+
+proc dissmissAlert*(self: Session) =
+    let requrl = $(self.driver.url / "session" / self.id / "alert" / "dismiss")
+    let obj = %*{"":""}
+
+    let resp = self.driver.client.postContent(requrl, $obj)
+
+    let respObj = parseJson(resp)
+
+    if respObj["value"].kind != JNull:
+        raise newException(WebDriverException, $respObj)
+
+proc alertText*(self: Session): string =
+    let requrl = $(self.driver.url / "session" / self.id / "alert" / "text")
+    
+    let resp = self.driver.client.getContent(requrl)
+
+    let respObj = parseJson(resp)
+
+    return respObj["value"].getStr()
+
+
 when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
     session.navigate("https://google.com/")
-    var cookie = session.getAllCookies()
-    echo cookie
-    session.navigate("https://google.com/")
-    session.deleteAllCookies()
-    session.addCookies(cookie)
-    echo session.getAllCookies()
+    session.executeScript("alert(1);")
+    echo session.alertText()
+    session.dissmissAlert()
     session.closeWindow()
+    
