@@ -189,6 +189,17 @@ proc executeScript*(self: Session, script: string) =
     if respObj["value"].kind != JNull:
         raise newException(WebDriverException, $respObj)
 
+proc executeAsyncScript*(self: Session, script: string) =
+    let requrl = $(self.driver.url / "session" / self.id / "execute" / "async")
+    let obj = %*{"script": script, "args": []}
+
+    let resp = self.driver.client.postContent(requrl, $obj)
+
+    let respObj = parseJson(resp)
+
+    if respObj["value"].kind != JNull:
+        raise newException(WebDriverException, $respObj)
+
 proc dissmissAlert*(self: Session) =
     let requrl = $(self.driver.url / "session" / self.id / "alert" / "dismiss")
     let obj = %*{"":""}
@@ -225,9 +236,7 @@ when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
-    session.navigate("https://google.com/")
-    session.executeScript("alert(1);")
+    session.navigate("https://example.com/")
     echo session.alertText()
-    session.acceptAlert()
-    session.closeWindow()
+    #session.closeWindow()
     
