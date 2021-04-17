@@ -200,6 +200,17 @@ proc dissmissAlert*(self: Session) =
     if respObj["value"].kind != JNull:
         raise newException(WebDriverException, $respObj)
 
+proc acceptAlert*(self: Session) =
+    let requrl = $(self.driver.url / "session" / self.id / "alert" / "accept")
+    let obj = %*{"":""}
+
+    let resp = self.driver.client.postContent(requrl, $obj)
+
+    let respObj = parseJson(resp)
+
+    if respObj["value"].kind != JNull:
+        raise newException(WebDriverException, $respObj)
+
 proc alertText*(self: Session): string =
     let requrl = $(self.driver.url / "session" / self.id / "alert" / "text")
     
@@ -217,6 +228,6 @@ when isMainModule:
     session.navigate("https://google.com/")
     session.executeScript("alert(1);")
     echo session.alertText()
-    session.dissmissAlert()
+    session.acceptAlert()
     session.closeWindow()
     
