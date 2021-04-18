@@ -237,13 +237,25 @@ proc findElement*(self: Session, use: string, value: string): string =
 
     let resp = self.driver.client.postContent(requrl, $obj)
     echo resp
-    let elementid = resp.split('"')[3] #Shitty workaround for the parsing
+    let elementid = resp.split('"')[5] #Shitty workaround for the parsing
     return elementid
+
+proc click*(self: Session, elementid: string) =
+    let requrl = $(self.driver.url / "session" / self.id / "element" / elementid / "click")
+    let obj = %*{"":""}
+
+    let resp = self.driver.client.postContent(requrl, $obj)
+    
+    let respObj = parseJson(resp)
+    if respObj["value"].kind != JNull:
+        raise newException(WebDriverException, $respObj)
 
 when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
-    session.navigate("https://google.com/")
-    echo session.findElement("xpath", "/html/body/div[2]/div[2]/div[3]/span/div/div/div[3]/button[2]/div")
+    session.navigate("https://github.com/")
+    var test = session.findElement("xpath", "/html/body/div[1]/header/div/div[2]/div[2]/a[1]")
+    echo test
+    session.click(test)
     session.closeWindow()
