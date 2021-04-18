@@ -1,4 +1,4 @@
-import httpclient, uri, json, tables, base64, os 
+import httpclient, uri, json, tables, base64, os , strutils
 
 type 
     WebDriver* = ref object
@@ -231,12 +231,19 @@ proc alertText*(self: Session): string =
 
     return respObj["value"].getStr()
 
+proc findElement*(self: Session, use: string, value: string): string = 
+    let requrl = $(self.driver.url / "session" / self.id / "element")
+    let obj = %*{"using": use, "value": value}
+
+    let resp = self.driver.client.postContent(requrl, $obj)
+    echo resp
+    let elementid = resp.split('"')[3] #Shitty workaround for the parsing
+    return elementid
 
 when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
-    session.navigate("https://example.com/")
-    echo session.alertText()
-    #session.closeWindow()
-    
+    session.navigate("https://google.com/")
+    echo session.findElement("xpath", "/html/body/div[2]/div[2]/div[3]/span/div/div/div[3]/button[2]/div")
+    session.closeWindow()
