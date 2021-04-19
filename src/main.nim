@@ -269,11 +269,24 @@ proc sendKeys*(self: Session, elementid: string, text: string) =
     if respObj["value"].kind != JNull:
         raise newException(WebDriverException, $respObj)
 
+proc clear*(self: Session, elementid: string) =
+    let requrl = $(self.driver.url / "session" / self.id / "element" / elementid / "clear")
+    let obj = %*{"":""}
+
+    let resp = self.driver.client.postContent(requrl, $obj)
+
+    let respObj = parseJson(resp)
+    if respObj["value"].kind != JNull:
+        raise newException(WebDriverException, $respObj)
+
 when isMainModule:
     let webDriver = newWebDriver()
     let session = webdriver.createSession()
     #echo session
     session.navigate("https://github.com/login")
     let username = session.findElement("xpath", """//*[@id="login_field"]""")
-    session.takeElementScreenshot(username, "test.png")
+    session.sendKeys(username, "test")
+    sleep(3000)
+    session.clear(username)
+    sleep(1000)
     session.closeWindow()
