@@ -178,6 +178,15 @@ proc takeScreenshot*(self: Session, filename: string) =
     let decoded = decode(respObj["value"].getStr())
     writeFile(filename, decoded)
 
+proc takeElementScreenshot*(self: Session, elementid: string, filename: string) =
+    let requrl = $(self.driver.url / "session" / self.id / "element" / elementid / "screenshot")
+    let resp = self.driver.client.getContent(requrl)
+
+    let respObj = parseJson(resp)
+
+    let decoded = decode(respObj["value"].getStr())
+    writeFile(filename, decoded)
+
 proc executeScript*(self: Session, script: string) =
     let requrl = $(self.driver.url / "session" / self.id / "execute" / "sync")
     let obj = %*{"script": script, "args": []}
@@ -266,5 +275,5 @@ when isMainModule:
     #echo session
     session.navigate("https://github.com/login")
     let username = session.findElement("xpath", """//*[@id="login_field"]""")
-    session.sendKeys(username, "test")
+    session.takeElementScreenshot(username, "test.png")
     session.closeWindow()
